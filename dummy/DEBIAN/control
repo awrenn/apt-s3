@@ -1,0 +1,8 @@
+Package: dummy
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: amd64
+Essential: no
+Maintainer: awrenn
+Description: A dummy deb package, created by dpkg-deb
