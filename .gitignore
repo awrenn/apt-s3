@@ -4,3 +4,4 @@ apt-s3
 terraform*
 *.deb
 out/
+*.gpg
