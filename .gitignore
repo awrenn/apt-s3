@@ -1,7 +1,11 @@
-dummy.deb
+dummy*/
+dummy/
+out/
+*.deb
+
 apt-s3
+
 .terraform**
 terraform*
-*.deb
-out/
+
 *.gpg

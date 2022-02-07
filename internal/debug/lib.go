@@ -2,16 +2,25 @@ package debug
 
 import (
 	"context"
+	"encoding/base32"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
+	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 const (
 	DebugFileKey = "debug-file"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func LoadLogWriter(ctx context.Context) io.Writer {
 	f, ok := ctx.Value(DebugFileKey).(io.Writer)
@@ -34,7 +43,7 @@ func RegisterLogWriter(ctx context.Context, w io.Writer) context.Context {
 }
 
 func FindDummy(curDir string) (fin string, err error) {
-	return findFile(curDir, "dummy.deb")
+	return CreateDummy(curDir, RandomString(6))
 }
 
 func FindRelease(curDir string) (fin string, err error) {
@@ -55,4 +64,27 @@ func findFile(curDir, file string) (fin string, err error) {
 		}
 	}
 	return findFile(filepath.Clean(filepath.Join(curDir, "..")), file)
+}
+
+func CreateDummy(curDir, version string) (fin string, err error) {
+	makefile, err := findFile(curDir, "Makefile")
+	if err != nil {
+		return "", err
+	}
+	makedir := filepath.Dir(makefile)
+	cmd := exec.Command("make", "dummy")
+	cmd.Env = append(cmd.Env, fmt.Sprintf("Version=%s", version))
+	cmd.Dir = makedir
+	err = cmd.Run()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(makedir, "dummy", fmt.Sprintf("dummy_%s.deb", version)), nil
+}
+
+func RandomString(l int) string {
+	b := make([]byte, l)
+	rand.Read(b)
+	b64 := base32.StdEncoding.EncodeToString(b)
+	return b64[:l]
 }
