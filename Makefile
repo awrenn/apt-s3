@@ -13,4 +13,4 @@ test: ./dummy.deb
 	dpkg-deb --build ./dummy ./dummy.deb
 
 repo:
-	echo deb https://$(shell terraform output -json  | jq -r .dummy_repo_url.value) main stable
+	echo deb [trusted=yes] https://$(shell terraform output -json  | jq -r .dummy_repo_url.value) main stable
