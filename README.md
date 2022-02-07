@@ -23,4 +23,4 @@ Some other features I am hoping to get added, besides the two obvious missing fe
 1. The ability to correct/fix existing Package and Release files.  
 2. The CLI experience is quite poor, due to using `flag` instead of a 3rd party library. Smarter usage of the flag library / simple first-party cli tooling is pretty curcial.  
 3. Eliminate 3rd party dependencies - currently there are three direct libraries - a go XZ library, AWS's s3 library, and a reliance on the system's `ar` binary.   
-
+4. Better automated testing - currently, tests are best ran with `go test -v`, and manually inspecting outputs.  
