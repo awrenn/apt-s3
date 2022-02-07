@@ -1,0 +1,8 @@
+Package: apt-s3
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: amd64
+Essential: no
+Maintainer: awrenn
+Description: A tool for adding .deb files to your apt repos, so you can have an apt server without a webserver.

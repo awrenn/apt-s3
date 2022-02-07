@@ -2,3 +2,5 @@ dummy.deb
 apt-s3
 .terraform**
 terraform*
+*.deb
+out/
