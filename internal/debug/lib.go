@@ -2,11 +2,12 @@ package debug
 
 import (
 	"context"
-	"encoding/base32"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -43,7 +44,7 @@ func RegisterLogWriter(ctx context.Context, w io.Writer) context.Context {
 }
 
 func FindDummy(curDir string) (fin string, err error) {
-	return CreateDummy(curDir, RandomString(6))
+	return CreateDummy(curDir, "1."+RandomString(6))
 }
 
 func FindRelease(curDir string) (fin string, err error) {
@@ -73,10 +74,11 @@ func CreateDummy(curDir, version string) (fin string, err error) {
 	}
 	makedir := filepath.Dir(makefile)
 	cmd := exec.Command("make", "dummy")
-	cmd.Env = append(cmd.Env, fmt.Sprintf("Version=%s", version))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("VERSION=%s", version))
 	cmd.Dir = makedir
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Println(string(out))
 		return "", err
 	}
 	return filepath.Join(makedir, "dummy", fmt.Sprintf("dummy_%s.deb", version)), nil
@@ -85,6 +87,6 @@ func CreateDummy(curDir, version string) (fin string, err error) {
 func RandomString(l int) string {
 	b := make([]byte, l)
 	rand.Read(b)
-	b64 := base32.StdEncoding.EncodeToString(b)
+	b64 := hex.EncodeToString(b)
 	return b64[:l]
 }

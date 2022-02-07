@@ -37,16 +37,23 @@ type HashSet struct {
 }
 
 func PublishDebFile(ctx context.Context, debFile deb.DebPackage, region, bucket, key string) error {
-	sess := session.Must(session.NewSession(
-		&aws.Config{
-			Region: aws.String(region),
-		},
-	))
+	return PublishDebFileWithConfig(ctx, debFile, S3Config{
+		Region: region,
+		Bucket: bucket,
+
+		Sign:     true,
+		GPGKeyID: key,
+	})
+}
+
+func PublishDebFileWithConfig(ctx context.Context, debFile deb.DebPackage, conf S3Config) error {
+	c := conf.GenerateS3Config()
+	sess := session.Must(session.NewSession(c))
 	uploader := s3manager.NewUploader(sess)
 	downloader := s3manager.NewDownloader(sess)
 
 	// Adding our raw deb to the pool is always fine - someone could download it manually, but apt wouldn't find it.
-	path, err := uploadDebFile(ctx, uploader, debFile, bucket)
+	path, err := uploadDebFile(ctx, uploader, debFile, conf.Bucket)
 	if err != nil {
 		return err
 	}
@@ -55,11 +62,11 @@ func PublishDebFile(ctx context.Context, debFile deb.DebPackage, region, bucket,
 	// These two files need to be completed atomically.
 	// If not, we should consider how we rollback.
 	// We also need to add locking
-	hashes, err := syncPackageFile(ctx, uploader, downloader, debFile, bucket)
+	hashes, err := syncPackageFile(ctx, uploader, downloader, debFile, conf.Bucket)
 	if err != nil {
 		return err
 	}
-	err = syncReleaseFile(ctx, uploader, downloader, debFile, bucket, key, hashes)
+	err = syncReleaseFile(ctx, uploader, downloader, debFile, conf.Bucket, conf.GPGKeyID, hashes)
 	if err != nil {
 		return err
 	}
@@ -80,13 +87,12 @@ func uploadDebFile(ctx context.Context, uploader *s3manager.Uploader, debFile de
 		Body:   bufio.NewReader(r),
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Failed to upload deb file into the pool: %w", err)
 	}
 	return fp, nil
 }
 
-func syncPackageFile(ctx context.Context, uploader *s3manager.Uploader, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket string) (PackageHashes, error) {
-	h := PackageHashes{}
+func fetchOldPackageFile(ctx context.Context, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket string) ([]*deb.ControlManifest, error) {
 	key := fmt.Sprintf("%s/binary-%s/Packages", debFile.Repo(), debFile.Arch())
 	packageKey := fmt.Sprintf("dists/%s/%s", debFile.Distribution(), key)
 	b := aws.NewWriteAtBuffer(make([]byte, 0))
@@ -98,15 +104,23 @@ func syncPackageFile(ctx context.Context, uploader *s3manager.Uploader, download
 	if err != nil {
 		e, ok := err.(awserr.RequestFailure)
 		if ok && e.Code() == s3.ErrCodeNoSuchKey {
-			goto Eliminate
+			return previous, nil
 		}
-		return h, err
+		return nil, err
 	}
 	previous, err = deb.ParsePackageList(b.Bytes())
 	if err != nil {
+		return nil, err
+	}
+	return previous, nil
+}
+
+func syncPackageFile(ctx context.Context, uploader *s3manager.Uploader, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket string) (PackageHashes, error) {
+	h := PackageHashes{}
+	previous, err := fetchOldPackageFile(ctx, downloader, debFile, bucket)
+	if err != nil {
 		return h, err
 	}
-Eliminate:
 	builder := new(strings.Builder)
 	for _, p := range previous {
 		if p.Package == "" || p.Version == "" {
@@ -122,6 +136,10 @@ Eliminate:
 		builder.WriteString("\n")
 	}
 	builder.WriteString(debFile.Control.Serialize())
+
+	key := fmt.Sprintf("%s/binary-%s/Packages", debFile.Repo(), debFile.Arch())
+	packageKey := fmt.Sprintf("dists/%s/%s", debFile.Distribution(), key)
+
 	many := builder.String()
 	_, err = uploader.UploadWithContext(ctx, &s3manager.UploadInput{
 		Key:    aws.String(packageKey),

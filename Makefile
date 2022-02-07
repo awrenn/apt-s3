@@ -4,6 +4,9 @@ ARCH?=amd64
 BUCKET?=dummy-apt
 VERSION?=1.0.0
 
+MINIO_PORT?=9000
+MINIO_NAME?=apt-s3_minio_tester
+
 build: ./apt-s3
 
 ./apt-s3: $(shell find -name *.go)
@@ -18,19 +21,18 @@ simulate-sign: ./apt-s3
 add-key: 
 	gpg --export $(GPG_KEY) | sudo apt-key add -
 
-test: ./dummy.deb
+test: 
 	go test ./...
 
 dummy: ./dummy_$(VERSION).deb
 
 ./dummy_$(VERSION).deb:
-	mkdir -p ./dummy_$(VERSION)/DEBIAN
-	mkdir -p ./dummy
-	cat ./files/dummy | sed -e "s|{{ VERSION }}|$(VERSION)|" > ./dummy_$(VERSION)/DEBIAN/control
-	mkdir -p ./dummy_$(VERSION)/usr/local/bin
-	echo "#!/bin/sh\necho 'test binary'" >  ./dummy_$(VERSION)/usr/local/bin/dummy
-	chmod +x ./dummy_$(VERSION)/usr/local/bin/dummy
-	dpkg-deb --build ./dummy_$(VERSION) ./dummy/dummy_$(VERSION).deb
+	mkdir -p ./dummy/dummy_$(VERSION)/DEBIAN
+	cat ./files/dummy | sed -e "s|{{ VERSION }}|$(VERSION)|" > ./dummy/dummy_$(VERSION)/DEBIAN/control
+	mkdir -p ./dummy/dummy_$(VERSION)/usr/local/bin
+	echo "#!/bin/sh\necho 'test binary'" >  ./dummy/dummy_$(VERSION)/usr/local/bin/dummy
+	chmod +x ./dummy/dummy_$(VERSION)/usr/local/bin/dummy
+	dpkg-deb --build ./dummy/dummy_$(VERSION) ./dummy/dummy_$(VERSION).deb
 
 repo:
 	echo deb https://$(shell terraform output -json  | jq -r .dummy_repo_url.value) main stable
