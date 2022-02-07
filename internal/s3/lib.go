@@ -87,7 +87,8 @@ func uploadDebFile(ctx context.Context, uploader *s3manager.Uploader, debFile de
 
 func syncPackageFile(ctx context.Context, uploader *s3manager.Uploader, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket string) (PackageHashes, error) {
 	h := PackageHashes{}
-	packageKey := fmt.Sprintf("dists/%s/%s/binary-%s/Packages", debFile.Distribution(), debFile.Repo(), debFile.Arch())
+	key := fmt.Sprintf("%s/binary-%s/Packages", debFile.Repo(), debFile.Arch())
+	packageKey := fmt.Sprintf("dists/%s/%s", debFile.Distribution(), key)
 	b := aws.NewWriteAtBuffer(make([]byte, 0))
 	_, err := downloader.DownloadWithContext(ctx, b, &s3.GetObjectInput{
 		Key:    aws.String(packageKey),
@@ -136,7 +137,7 @@ Eliminate:
 	hasher := sha256.New()
 	n, _ := io.Copy(hasher, bytes.NewBuffer([]byte(many)))
 	h.Regular.Size = strconv.Itoa(int(n))
-	h.Regular.Path = packageKey
+	h.Regular.Path = key
 	h.Regular.SHA256 = hex.EncodeToString(hasher.Sum(buf))
 
 	hasher = sha1.New()
@@ -159,7 +160,7 @@ Eliminate:
 	hasher = sha256.New()
 	n, _ = io.Copy(hasher, getZipReader([]byte(many)))
 	h.Zipped.Size = strconv.Itoa(int(n))
-	h.Zipped.Path = packageKey + ".gz"
+	h.Zipped.Path = key + ".gz"
 	h.Zipped.SHA256 = hex.EncodeToString(hasher.Sum(buf))
 
 	hasher = sha1.New()
