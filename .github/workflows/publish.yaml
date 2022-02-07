@@ -22,6 +22,12 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Install go
+        id: setup_go
+        uses: actions/setup-go@v2
+        with:
+          stable: 'true'
+          go-version: '1.17'
       - name: Publish
         run: >
           make publish GPG_KEY=${{ secrets.GPG_ID }} BUCKET=${{ secrets.AWS_BUCKET }}
