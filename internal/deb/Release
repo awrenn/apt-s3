@@ -1,0 +1,38 @@
+Codename: stable
+Date: Sun, 06 Feb 2022 19:09:34 UTC
+Architectures: amd64 i386 armhf arm64 arm32
+Components: main
+Suite: 
+MD5Sum:
+ ed20d8b580641daeaf71de8b7cfd6e15              930 main/binary-amd64/Packages
+ 4dc86e0115ee8b4d48b3888033b248da              501 main/binary-amd64/Packages.gz
+ 8c37f7f190ba3cee8b261af8877df7e5              502 main/binary-arm32/Packages
+ 44c4319777529c3cc7a4c3b9440f310a              373 main/binary-arm32/Packages.gz
+ 5a2597e420f292c95909850dc43e3b6b              957 main/binary-arm64/Packages
+ 0db21520eacf0e7abbc59c7178011338              497 main/binary-arm64/Packages.gz
+ d41d8cd98f00b204e9800998ecf8427e                0 main/binary-armhf/Packages
+ 4594084aee3a5e70bfafc20f995b37a7               20 main/binary-armhf/Packages.gz
+ d41d8cd98f00b204e9800998ecf8427e                0 main/binary-i386/Packages
+ 4594084aee3a5e70bfafc20f995b37a7               20 main/binary-i386/Packages.gz
+SHA1:
+ 382ec8c39a09a74a4dae79a975a16a533208e8b9              930 main/binary-amd64/Packages
+ 9feac18a8be1cd334162946cd9780889d0804ff1              501 main/binary-amd64/Packages.gz
+ a27c6d052030573de7b77eb80241779031c47935              502 main/binary-arm32/Packages
+ c32f59b15a25fa86fac846b68b774cc544cae4de              373 main/binary-arm32/Packages.gz
+ 5e35a1b4d4f0720c341f249e435bf4602c68b82c              957 main/binary-arm64/Packages
+ 72cf019f7d7ec832676002b85794d3854c9f0f1f              497 main/binary-arm64/Packages.gz
+ da39a3ee5e6b4b0d3255bfef95601890afd80709                0 main/binary-armhf/Packages
+ 810c39a6d1676a9ee39fdfceafa641c42448332e               20 main/binary-armhf/Packages.gz
+ da39a3ee5e6b4b0d3255bfef95601890afd80709                0 main/binary-i386/Packages
+ 810c39a6d1676a9ee39fdfceafa641c42448332e               20 main/binary-i386/Packages.gz
+SHA256:
+ b8490ec4d09c398b5a775155207c778d394c00a75efbdc68732ba85e09ff72c7              930 main/binary-amd64/Packages
+ cf7cb2b7c3f35aceb9d908370519b71159f7c32d669166294d961d147f5a09bc              501 main/binary-amd64/Packages.gz
+ a69dca6aab25324519752968417cf727c85f75b60dad684c1c9df77628409ee6              502 main/binary-arm32/Packages
+ 5635c21b97f709c4562dc2630622a69a9236d9647225d7d204b2f5d4e0481038              373 main/binary-arm32/Packages.gz
+ 406d25021590eb9c15903dc078fe90bd73286e8bcd84277292bb487368a2a5bc              957 main/binary-arm64/Packages
+ 0673cfc04d9bc99d765908d619f1600c9bd53ff2ac95422bb1a42adeae64499d              497 main/binary-arm64/Packages.gz
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855                0 main/binary-armhf/Packages
+ 26bbb5e3545ad2852efc4abc95239d840ddb1324f6623aa6f1a2a99cda8b6e6d               20 main/binary-armhf/Packages.gz
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855                0 main/binary-i386/Packages
+ 26bbb5e3545ad2852efc4abc95239d840ddb1324f6623aa6f1a2a99cda8b6e6d               20 main/binary-i386/Packages.gz
