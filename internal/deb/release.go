@@ -1,7 +1,9 @@
 package deb
 
 import (
+	"bytes"
 	"fmt"
+	"os/exec"
 	"reflect"
 	"regexp"
 	"strings"
@@ -101,6 +103,23 @@ func (r *ReleaseManfifest) Serialize() string {
 	return out.String()
 }
 
+func (r *ReleaseManfifest) SerializeAndSign(key string) (string, error) {
+	raw := r.Serialize()
+	cmd := exec.Command("gpg", "-a", "-s", "--clearsign", "-b", "-u", key)
+	cmd.Stdin = bytes.NewBuffer([]byte(raw))
+
+	eb := bytes.NewBuffer(make([]byte, 0))
+	cmd.Stderr = eb
+
+	sig, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("Error from GPG:\n%s", string(eb.Bytes()))
+		return "", err
+	}
+
+	return string(sig), nil
+}
+
 func (r *ReleaseManfifest) AddArch(arch string) {
 	parts := strings.Split(r.Architectures, " ")
 	for _, p := range parts {
@@ -122,7 +141,8 @@ func (r *ReleaseManfifest) AddComponent(comp string) {
 }
 
 func (r *ReleaseManfifest) UpdateDate() {
-	r.Date = time.Now().Format(time.RFC1123)
+	now := time.Now().UTC()
+	r.Date = now.Format(time.RFC1123)
 }
 
 func (r *ReleaseManfifest) AddHash(hash, size, path string) {

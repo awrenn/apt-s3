@@ -36,7 +36,7 @@ type HashSet struct {
 	Path   string
 }
 
-func PublishDebFile(ctx context.Context, debFile deb.DebPackage, region, bucket string) error {
+func PublishDebFile(ctx context.Context, debFile deb.DebPackage, region, bucket, key string) error {
 	sess := session.Must(session.NewSession(
 		&aws.Config{
 			Region: aws.String(region),
@@ -59,7 +59,7 @@ func PublishDebFile(ctx context.Context, debFile deb.DebPackage, region, bucket 
 	if err != nil {
 		return err
 	}
-	err = syncReleaseFile(ctx, uploader, downloader, debFile, bucket, hashes)
+	err = syncReleaseFile(ctx, uploader, downloader, debFile, bucket, key, hashes)
 	if err != nil {
 		return err
 	}
@@ -136,6 +136,7 @@ Eliminate:
 	hasher := sha256.New()
 	n, _ := io.Copy(hasher, bytes.NewBuffer([]byte(many)))
 	h.Regular.Size = strconv.Itoa(int(n))
+	h.Regular.Path = packageKey
 	h.Regular.SHA256 = hex.EncodeToString(hasher.Sum(buf))
 
 	hasher = sha1.New()
@@ -157,8 +158,9 @@ Eliminate:
 	// We don't need to re-compress this file over and over and over again
 	hasher = sha256.New()
 	n, _ = io.Copy(hasher, getZipReader([]byte(many)))
-	h.Zipped.SHA256 = hex.EncodeToString(hasher.Sum(buf))
 	h.Zipped.Size = strconv.Itoa(int(n))
+	h.Zipped.Path = packageKey + ".gz"
+	h.Zipped.SHA256 = hex.EncodeToString(hasher.Sum(buf))
 
 	hasher = sha1.New()
 	io.Copy(hasher, getZipReader([]byte(many)))
@@ -171,8 +173,9 @@ Eliminate:
 	return h, err
 }
 
-func syncReleaseFile(ctx context.Context, uploader *s3manager.Uploader, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket string, hashes PackageHashes) error {
+func syncReleaseFile(ctx context.Context, uploader *s3manager.Uploader, downloader *s3manager.Downloader, debFile deb.DebPackage, bucket, gpgKey string, hashes PackageHashes) error {
 	releaseName := fmt.Sprintf("dists/%s/Release", debFile.Distribution())
+
 	b := aws.NewWriteAtBuffer(make([]byte, 0))
 	_, err := downloader.DownloadWithContext(ctx, b, &s3.GetObjectInput{
 		Key:    aws.String(releaseName),
@@ -211,7 +214,23 @@ Send:
 	if err != nil {
 		return err
 	}
-	return nil
+
+	// We don't have a key passed to us, we're done.
+	if gpgKey == "" {
+		return nil
+	}
+	// Otherwise, let's upload an InRelease file as well.
+	man, err := manifest.SerializeAndSign(gpgKey)
+	if err != nil {
+		return err
+	}
+	inReleaseName := fmt.Sprintf("dists/%s/InRelease", debFile.Distribution())
+	_, err = uploader.UploadWithContext(ctx, &s3manager.UploadInput{
+		Key:    aws.String(inReleaseName),
+		Bucket: aws.String(bucket),
+		Body:   bytes.NewBuffer([]byte(man)),
+	})
+	return err
 }
 
 func getZipReader(b []byte) io.Reader {

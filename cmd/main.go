@@ -20,6 +20,7 @@ func main() {
 	regionFlag := flag.String("region", "", "Which region is the target s3 bucket in?")
 	bucketFlag := flag.String("bucket", "", "Which bucket should we extract our deb package into?")
 	debFlag := flag.String("deb", "", "What is the path to the desired deb file?")
+	keyFlag := flag.String("key", "", "What GPG key should be used to sign this Release? Leave blank for no signature.")
 
 	flag.Parse()
 
@@ -35,7 +36,7 @@ func main() {
 	if err != nil {
 		os.Exit(handleError(err))
 	}
-	os.Exit(handleError(s3.PublishDebFile(ctx, debFile, *regionFlag, *bucketFlag)))
+	os.Exit(handleError(s3.PublishDebFile(ctx, debFile, *regionFlag, *bucketFlag, *keyFlag)))
 }
 
 func handleError(err error) int {

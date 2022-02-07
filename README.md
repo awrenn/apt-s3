@@ -10,10 +10,9 @@ It currently only has very basic features - if you point to a deb file, it will:
 3. Download the existing package file for repo/codename/arch, add this deb file and its hashes, and re-upload the package file.
 4. Download the existing Release file, adds the package's arch and component if not present, and then re-uploads the Release file.
 
-`apt-s3` is still missing a couple major features, the two biggest ones being:
+`apt-s3` is still missing a couple major features, the biggest one being:
 
-1. The ability to sign packages with gpg. `apt-s3` never creates an InRelease file either.
-2. The ability to change the component that the package is uploaded under - currently only `main` for a component and `stable` for a codename.
+1. The ability to change the component that the package is uploaded under - currently only `main` for a component and `stable` for a codename.
 
 The following command can be used to a deb file to a bucket:  
 `./apt-s3 -region us-west-2 -bucket dummy-apt -deb ./dummy.deb`  
