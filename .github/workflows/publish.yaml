@@ -18,6 +18,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
       - name: Import signing key
         run: >
+          apt update && \
+          apt insatll -y gpg && \
           echo ${{ secrets.GPG_KEY }} | gpg --import 
       - name: Publish
         run: >
