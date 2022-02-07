@@ -17,10 +17,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
       - name: Import signing key
-        run: >
-          apt update && \
-          apt insatll -y gpg && \
-          echo ${{ secrets.GPG_KEY }} | gpg --import 
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.GPG_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
       - name: Publish
         run: >
-          make publish GPG_KEY=acwrenn BUCKET=${{ secrets.AWS_BUCKET }}
+          make publish GPG_KEY=${{ secrets.GPG_ID }} BUCKET=${{ secrets.AWS_BUCKET }}
