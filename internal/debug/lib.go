@@ -34,6 +34,14 @@ func RegisterLogWriter(ctx context.Context, w io.Writer) context.Context {
 }
 
 func FindDummy(curDir string) (fin string, err error) {
+	return findFile(curDir, "dummy.deb")
+}
+
+func FindRelease(curDir string) (fin string, err error) {
+	return findFile(curDir, "Release")
+}
+
+func findFile(curDir, file string) (fin string, err error) {
 	if curDir == "/" {
 		return "", errors.New("Dummy file not found")
 	}
@@ -42,9 +50,9 @@ func FindDummy(curDir string) (fin string, err error) {
 		return "", err
 	}
 	for _, f := range files {
-		if f.Name() == "dummy.deb" && !f.IsDir() {
-			return filepath.Join(curDir, "dummy.deb"), nil
+		if f.Name() == file && !f.IsDir() {
+			return filepath.Join(curDir, file), nil
 		}
 	}
-	return FindDummy(filepath.Clean(filepath.Join(curDir, "..")))
+	return findFile(filepath.Clean(filepath.Join(curDir, "..")), file)
 }
