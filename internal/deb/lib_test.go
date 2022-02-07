@@ -80,7 +80,7 @@ func TestAddPackageToRelease(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummy, err := debug.CreateDummy(wd, "v"+debug.RandomString(16))
+	dummy, err := debug.FindDummy(wd)
 	if err != nil {
 		t.Fatal(err)
 	}
