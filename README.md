@@ -14,8 +14,8 @@ It currently only has very basic features - if you point to a deb file, it will:
 
 1. The ability to change the component that the package is uploaded under - currently only `main` for a component and `stable` for a codename.
 
-The following command can be used to a deb file to a bucket:  
-`./apt-s3 -region us-west-2 -bucket dummy-apt -deb ./dummy.deb`  
+The following command can be used to publish a deb file to a bucket, where we want it signed with the local gpg key `awrenn`:  
+`./apt-s3 -region us-west-2 -bucket dummy-apt -deb ./dummy.deb -key awrenn`  
 
 
 Some other features I am hoping to get added, besides the two obvious missing features above:   
