@@ -146,7 +146,7 @@ func (r *ReleaseManfifest) UpdateDate() {
 }
 
 func (r *ReleaseManfifest) AddHash(hash, size, path string) {
-	s := ReleaseSum{
+	n := ReleaseSum{
 		Hash: hash,
 		Size: size,
 		Path: path,
@@ -155,27 +155,27 @@ func (r *ReleaseManfifest) AddHash(hash, size, path string) {
 	case 32:
 		for i, s := range r.md5Sums {
 			if s.Path == path {
-				r.md5Sums[i] = s
+				r.md5Sums[i] = n
 				return
 			}
 		}
-		r.md5Sums = append(r.md5Sums, s)
+		r.md5Sums = append(r.md5Sums, n)
 	case 40:
 		for i, s := range r.sha1Sums {
 			if s.Path == path {
-				r.sha1Sums[i] = s
+				r.sha1Sums[i] = n
 				return
 			}
 		}
-		r.sha1Sums = append(r.sha1Sums, s)
+		r.sha1Sums = append(r.sha1Sums, n)
 	case 64:
 		for i, s := range r.sha256Sums {
 			if s.Path == path {
-				r.sha256Sums[i] = s
+				r.sha256Sums[i] = n
 				return
 			}
 		}
-		r.sha256Sums = append(r.sha256Sums, s)
+		r.sha256Sums = append(r.sha256Sums, n)
 	default:
 		fmt.Println("WARNING: Found ill-understood hash.")
 	}
