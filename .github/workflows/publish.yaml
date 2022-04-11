@@ -18,7 +18,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
       - name: Import signing key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: Zazu-Sensor/ghaction-import-gpg@v4
         with:
           gpg_private_key: ${{ secrets.GPG_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
