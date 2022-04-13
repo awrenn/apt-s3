@@ -5,6 +5,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [arm64, amd64]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -33,4 +36,4 @@ jobs:
           make test
       - name: Publish
         run: >
-          make publish GPG_KEY=${{ secrets.GPG_ID }} BUCKET=${{ secrets.AWS_BUCKET }}
+          make publish ARCH=${{ matrix.arch }} GPG_KEY=${{ secrets.GPG_ID }} BUCKET=${{ secrets.AWS_BUCKET }}

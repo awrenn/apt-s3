@@ -10,7 +10,7 @@ MINIO_NAME?=apt-s3_minio_tester
 build: ./apt-s3
 
 ./apt-s3: $(shell find -name *.go)
-	go build -o ./apt-s3 ./cmd/main.go
+	GOARCH=$(ARCH) go build -o ./apt-s3 ./cmd/main.go
 
 simulate: ./apt-s3
 	./apt-s3 -region $(REGION) -bucket dummy-apt -deb ./dummy.deb
@@ -37,12 +37,15 @@ dummy: ./dummy_$(VERSION).deb
 repo:
 	echo deb https://$(shell terraform output -json  | jq -r .dummy_repo_url.value) main stable
 
-publish: ./apt-s3_$(ARCH).deb
-	./apt-s3 -region $(REGION) -bucket $(BUCKET) -deb ./apt-s3_$(ARCH).deb -key $(GPG_KEY)
+publish: ./apt-s3_$(ARCH)_$(VERSION).deb
+	./apt-s3 -region $(REGION) -bucket $(BUCKET) -deb ./apt-s3_$(ARCH)_$(VERSION).deb -key $(GPG_KEY)
 
-./apt-s3_$(ARCH).deb: ./apt-s3
+./apt-s3_$(ARCH)_$(VERSION).deb: ./apt-s3
 	mkdir -p ./out/DEBIAN
-	cp files/control ./out/DEBIAN/control
+	cat files/control | sed \
+		-e 's|{{ arch }}|$(ARCH)|' \
+		-e 's|{{ version }}|$(VERSION)|' \
+		> ./out/DEBIAN/control
 	mkdir -p ./out/usr/bin
 	cp ./apt-s3 ./out/usr/bin/apt-s3
-	dpkg-deb --build ./out ./apt-s3_$(ARCH).deb
+	dpkg-deb --build ./out ./apt-s3_$(ARCH)_$(VERSION).deb
