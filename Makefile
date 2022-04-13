@@ -9,6 +9,9 @@ MINIO_NAME?=apt-s3_minio_tester
 
 build: ./apt-s3
 
+./apt-s3-amd64: $(shell find -name *.go)
+	GOARCH=amd64 go build -o ./apt-s3-amd64 ./cmd/main.go
+
 ./apt-s3: $(shell find -name *.go)
 	GOARCH=$(ARCH) go build -o ./apt-s3 ./cmd/main.go
 
@@ -37,8 +40,9 @@ dummy: ./dummy_$(VERSION).deb
 repo:
 	echo deb https://$(shell terraform output -json  | jq -r .dummy_repo_url.value) main stable
 
-publish: ./apt-s3_$(ARCH)_$(VERSION).deb
-	./apt-s3 -region $(REGION) -bucket $(BUCKET) -deb ./apt-s3_$(ARCH)_$(VERSION).deb -key $(GPG_KEY)
+## We have to use the amd64 version to publish itself
+publish: ./apt-s3-amd64 ./apt-s3_$(ARCH)_$(VERSION).deb
+	./apt-s3-amd64 -region $(REGION) -bucket $(BUCKET) -deb ./apt-s3_$(ARCH)_$(VERSION).deb -key $(GPG_KEY)
 
 ./apt-s3_$(ARCH)_$(VERSION).deb: ./apt-s3
 	mkdir -p ./out/DEBIAN

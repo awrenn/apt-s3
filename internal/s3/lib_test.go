@@ -31,7 +31,6 @@ func testMain(m *testing.M) int {
 	}
 
 	port := uint16(10000 + rand.Intn(20000))
-	port = 9000
 	mc, err := debug.NewMinio("dummy-apt", "apt-s3_minio_tester", port)
 	if err != nil {
 		log.Println(err)
